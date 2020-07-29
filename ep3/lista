@@ -1,0 +1,56 @@
+(AB*|AAC)
+(AB*|AAC)D
+    ABBD
+    AD
+    ABAD
+
+(A*|B)A ou (A*|B)A*
+
+((A*B|AC)D)
+    AABD
+    AAABD
+    AABD
+    ACD
+    AABC
+
+((A|B)*C*|D)
+
+A*B(C|D)*
+
+10*1
+    11
+
+(1|0)(3|5)
+    135
+
+mac0(0*(1|2))*
+    mac121
+    mac000000012
+
+
+Extras:
+
+(A|C|G|T)*
+    ACGTGTACA
+
+a.b.*
+    abc
+    abbc
+
+(11)+
+    111111
+    11111
+
+[01]*
+
+[A-Z]+[0-9]+
+    FAK2498
+
+[^1-5]+[1-5][^1-5]+
+    6783876
+    98733789
+
+
+
+
+
