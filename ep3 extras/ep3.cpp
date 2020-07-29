@@ -8,7 +8,7 @@ class vertex {
     public:
         char caractere;
         vector<int> listAdj;
-        bool leitura;
+        int leitura;
 };
 
 class regex {
@@ -27,6 +27,7 @@ class regex {
                     dfs(proximo);
             }
         }
+
     public:
         regex(string expressao) {
             int i;
@@ -34,13 +35,13 @@ class regex {
             estados = new vertex[estadosSize];
             for (i = 0; i < expressao.size(); i++) {
                 estados[i].caractere = expressao[i];
-                estados[i].leitura = false;
+                estados[i].leitura = 0;
                 
                 if (expressao[i] == '\\') {
                     estados[i].listAdj.push_back(i+1);
                     i++;
                     estados[i].caractere = expressao[i];
-                    estados[i].leitura = true;
+                    estados[i].leitura = 1;
                     if (i+1 < expressao.size() && expressao[i+1] == '*') {
                         estados[i].listAdj.push_back(i+1);
                         estados[i+1].listAdj.push_back(i);
@@ -78,7 +79,11 @@ class regex {
                     estados[i].listAdj.push_back(i+1);
                 }
                 else {
-                    estados[i].leitura = true;
+                    if (expressao[i] == '.')
+                        estados[i].leitura = 2;
+                    else
+                        estados[i].leitura = 1;
+
                     if (i+1 < expressao.size()) {
                         if (expressao[i+1] == '+' || expressao[i+1] == '*')
                             estados[i+1].listAdj.push_back(i);
@@ -109,7 +114,9 @@ class regex {
                 for (j = 0; j < estadosSize; marcado[j] = false, j++);
 
                 for (j = 0; j < estadosSize - 1; j++) {
-                    if (visitado[j] && estados[j].leitura && palavra[i] == estados[j].caractere)
+                    if (estados[j].leitura == 2)
+                        marcado[j+1] = true;
+                    if (visitado[j] && estados[j].leitura == 1 && palavra[i] == estados[j].caractere)
                         marcado[j+1] = true;
                 }
                 
