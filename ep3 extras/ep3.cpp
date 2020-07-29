@@ -63,21 +63,28 @@ class regex {
                         pilha.pop();
                     }
                     
-                    if (i+1 < expressao.size() && expressao[i+1] == '*') {
-                        estados[pilha.top()].listAdj.push_back(i+1);
-                        estados[i+1].listAdj.push_back(pilha.top());
+                    if (i+1 < expressao.size()) {
+                        if (expressao[i+1] == '+' || expressao[i+1] == '*')
+                            estados[i+1].listAdj.push_back(pilha.top());
+                        
+                        if (expressao[i+1] == '*')
+                            estados[pilha.top()].listAdj.push_back(i+1);
+                        
                     }
                     pilha.pop();
                     estados[i].listAdj.push_back(i+1);
                 }
-                else if (expressao[i] == '*') {
+                else if (expressao[i] == '*' || expressao[i] == '+') {
                     estados[i].listAdj.push_back(i+1);
                 }
                 else {
                     estados[i].leitura = true;
-                    if (i+1 < expressao.size() && expressao[i+1] == '*') {
-                        estados[i].listAdj.push_back(i+1);
-                        estados[i+1].listAdj.push_back(i);
+                    if (i+1 < expressao.size()) {
+                        if (expressao[i+1] == '+' || expressao[i+1] == '*')
+                            estados[i+1].listAdj.push_back(i);
+                        
+                        if (expressao[i+1] == '*')
+                            estados[i].listAdj.push_back(i+1);
                     }
                 }
             }
