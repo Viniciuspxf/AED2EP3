@@ -4,11 +4,19 @@
 #include <vector>
 using namespace std;
 
+class set {
+    public:
+        bool complemento;
+        vector<bool> intervalo;
+        vector<char> caractere;
+};
+
 class vertex {
     public:
         char caractere;
         vector<int> listAdj;
         int leitura;
+        set conjunto;
 };
 
 class regex {
@@ -30,7 +38,8 @@ class regex {
 
     public:
         regex(string expressao) {
-            int i;
+            int i, j, contador;
+            set conjuntoAtual;
             estadosSize = expressao.size() + 1;
             estados = new vertex[estadosSize];
             for (i = 0; i < expressao.size(); i++) {
@@ -78,6 +87,49 @@ class regex {
                 else if (expressao[i] == '*' || expressao[i] == '+') {
                     estados[i].listAdj.push_back(i+1);
                 }
+                else if (expressao[i] == '[') {
+                    j = i+1;
+                    contador = 0;
+                    if (expressao[j] == '^') {
+                       conjuntoAtual.complemento = true;
+                        j++;
+                    }
+                    else 
+                        conjuntoAtual.complemento = false;
+                    
+                    conjuntoAtual.caractere.clear();
+                    conjuntoAtual.intervalo.clear();
+
+                    while (expressao[j] != ']') {
+                        contador++;
+        
+                        if (expressao[j] == '\\') {
+                            j++;
+                            if (expressao[j] == '-' && contador == 2)
+                                contador = 1;
+                        }
+                        conjuntoAtual.intervalo.push_back(false);
+                        conjuntoAtual.caractere.push_back(expressao[j]);
+                        
+                        if (contador == 3 && conjuntoAtual.caractere[conjuntoAtual.caractere.size() - 2] == '-') {
+                            conjuntoAtual.intervalo[conjuntoAtual.intervalo.size() - 3] = true;
+                            contador = 0;
+                        }
+                        else contador = 1;
+                        j++;
+                    }
+                    estados[i].listAdj.push_back(j);
+                    i = j;
+                    estados[i].conjunto = conjuntoAtual;
+                    estados[i].leitura = 3;
+                    if (i+1 < expressao.size()) {
+                        if (expressao[i+1] == '+' || expressao[i+1] == '*')
+                            estados[i+1].listAdj.push_back(i);
+                        
+                        if (expressao[i+1] == '*')
+                            estados[i].listAdj.push_back(i+1);
+                    }
+                }
                 else {
                     if (expressao[i] == '.')
                         estados[i].leitura = 2;
@@ -105,7 +157,8 @@ class regex {
         }
 
         bool valido(string palavra) {
-            int i, j;
+            int i, j, k;
+            bool achou;
             for (i = 0; i < estadosSize; visitado[i] = false, i++);
             dfs(0);
 
@@ -116,7 +169,25 @@ class regex {
                 for (j = 0; j < estadosSize - 1; j++) {
                     if (estados[j].leitura == 2)
                         marcado[j+1] = true;
-                    if (visitado[j] && estados[j].leitura == 1 && palavra[i] == estados[j].caractere)
+                    
+                    else if (estados[j].leitura == 3) {
+                        achou = false;
+                        for (k = 0; k < estados[j].conjunto.caractere.size(); k++) {
+                            if (estados[j].conjunto.intervalo[k] == false) {
+                                if (estados[j].conjunto.caractere[k] == palavra[i])
+                                    achou = true;
+                            }
+                            else {
+                                if (palavra[i] >= estados[j].conjunto.caractere[k] && palavra[i] <= estados[j].conjunto.caractere[k+2]) {
+                                    achou = true;
+                                }
+                                k += 2;
+                            }
+                        }
+                        if ((achou && !estados[j].conjunto.complemento) || (!achou && estados[j].conjunto.complemento))
+                            marcado[j+1] = true;
+                    }
+                    else if (visitado[j] && estados[j].leitura == 1 && palavra[i] == estados[j].caractere)
                         marcado[j+1] = true;
                 }
                 
