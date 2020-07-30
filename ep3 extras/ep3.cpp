@@ -111,11 +111,13 @@ class regex {
                         conjuntoAtual.intervalo.push_back(false);
                         conjuntoAtual.caractere.push_back(expressao[j]);
                         
-                        if (contador == 3 && conjuntoAtual.caractere[conjuntoAtual.caractere.size() - 2] == '-') {
-                            conjuntoAtual.intervalo[conjuntoAtual.intervalo.size() - 3] = true;
-                            contador = 0;
+                        if (contador == 3){
+                            if (conjuntoAtual.caractere[conjuntoAtual.caractere.size() - 2] == '-') {
+                                conjuntoAtual.intervalo[conjuntoAtual.intervalo.size() - 3] = true;
+                                contador = 0;
+                            }
+                            else contador = 1;
                         }
-                        else contador = 1;
                         j++;
                     }
                     estados[i].listAdj.push_back(j);
@@ -167,28 +169,30 @@ class regex {
                 for (j = 0; j < estadosSize; marcado[j] = false, j++);
 
                 for (j = 0; j < estadosSize - 1; j++) {
-                    if (estados[j].leitura == 2)
-                        marcado[j+1] = true;
-                    
-                    else if (estados[j].leitura == 3) {
-                        achou = false;
-                        for (k = 0; k < estados[j].conjunto.caractere.size(); k++) {
-                            if (estados[j].conjunto.intervalo[k] == false) {
-                                if (estados[j].conjunto.caractere[k] == palavra[i])
-                                    achou = true;
-                            }
-                            else {
-                                if (palavra[i] >= estados[j].conjunto.caractere[k] && palavra[i] <= estados[j].conjunto.caractere[k+2]) {
-                                    achou = true;
+                    if (visitado[j]){
+                        if (estados[j].leitura == 2)
+                            marcado[j+1] = true;
+                        
+                        else if (estados[j].leitura == 3) {
+                            achou = false;
+                            for (k = 0; k < estados[j].conjunto.caractere.size(); k++) {
+                                if (estados[j].conjunto.intervalo[k] == false) {
+                                    if (estados[j].conjunto.caractere[k] == palavra[i])
+                                        achou = true;
                                 }
-                                k += 2;
+                                else {
+                                    if (palavra[i] >= estados[j].conjunto.caractere[k] && palavra[i] <= estados[j].conjunto.caractere[k+2]) {
+                                        achou = true;
+                                    }
+                                    k += 2;
+                                }
                             }
+                            if ((achou && !estados[j].conjunto.complemento) || (!achou && estados[j].conjunto.complemento))
+                                marcado[j+1] = true;
                         }
-                        if ((achou && !estados[j].conjunto.complemento) || (!achou && estados[j].conjunto.complemento))
+                        else if (estados[j].leitura == 1 && palavra[i] == estados[j].caractere)
                             marcado[j+1] = true;
                     }
-                    else if (visitado[j] && estados[j].leitura == 1 && palavra[i] == estados[j].caractere)
-                        marcado[j+1] = true;
                 }
                 
                 for (j = 0; j < estadosSize; visitado[j] = false, j++);
